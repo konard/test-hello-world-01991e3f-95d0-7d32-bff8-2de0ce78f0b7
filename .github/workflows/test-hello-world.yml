@@ -1,0 +1,55 @@
+name: Test Hello World
+
+# Trigger the workflow on push to main branch and on pull requests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test Hello World Program
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Set up Node.js environment
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    # Run the Hello World program and capture output
+    - name: Run Hello World program
+      id: run_program
+      run: |
+        echo "Running hello-world.js..."
+        output=$(node hello-world.js)
+        echo "Program output: '$output'"
+        echo "output=$output" >> $GITHUB_OUTPUT
+    
+    # Verify the output matches expected string exactly
+    - name: Verify output
+      run: |
+        expected="Hello, World!"
+        actual="${{ steps.run_program.outputs.output }}"
+        echo "Expected: '$expected'"
+        echo "Actual: '$actual'"
+        
+        if [ "$actual" = "$expected" ]; then
+          echo "✅ Output matches expected result!"
+          echo "Test PASSED: Program correctly outputs 'Hello, World!'"
+        else
+          echo "❌ Output does not match expected result!"
+          echo "Test FAILED: Expected '$expected', but got '$actual'"
+          exit 1
+        fi
+    
+    # Optional: Display success message
+    - name: Success message
+      run: |
+        echo "🎉 All tests passed! Hello World program is working correctly."
